@@ -89,18 +89,19 @@ const DOM = {
   innerHTMLTransaction(transaction, index){
     const CSSclass = transaction.amount > 0 ? "income" : "expense"
 
-        const amount = Utils.formatCurrency(transaction.amount)
+    const amount = Utils.formatCurrency(transaction.amount)
 
-        const html = `
+    const html = ` 
+      <tr>
         <td class="description">${transaction.description}</td>
         <td class="${CSSclass}">${amount}</td>
         <td class="date">${transaction.date}</td>
         <td>
-            <img onclick="Transaction.remove(${index})" src="./assets/minus.svg" alt="Remover transação">
-        </td>
-        `
-
-        return html
+          <img src="./assets/minus.svg " alt="Remover transação">
+          </td>
+      </tr>
+    `
+    return html
   },
 
   updateBalance() {
@@ -144,11 +145,9 @@ const Form = {
 const App = {
   init() {
 
-    Transaction.all.forEach transaction => {
-      DOM.addTransaction(transaction)
-    })
-
+    Transaction.all.forEach(DOM.addTransaction)
     DOM.updateBalance()
+    
   },
   reload() {
     DOM.clearTransactions()
