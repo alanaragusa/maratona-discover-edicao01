@@ -2,47 +2,56 @@ const Modal = {
   open(){
     //abrir modal - adicional classe active ao modal
     document
-    .querySelector('.modal-overlay')
-    .classList.add('active')
+      .querySelector('.modal-overlay')
+      .classList.add('active')
   },
   close(){
     //fechar o modal - remover a classe active no modal
     document
-    .querySelector('.modal-overlay')
-    .classList.remove('active')
+      .querySelector('.modal-overlay')
+      .classList
+      .remove('active')
   }
 }
 
 const transactions = [
   {
-    id: 1,
     description:'Luz',
     amount: -50000, //valor será formatado posteriormente
     date: '23/01/2021'
   }, {
-    id: 2,
     description:'Website',
     amount: 500000, 
     date: '23/01/2021'
   }, {
-    id: 3,
     description:'Internet',
     amount: -20000, 
     date: '23/01/2021'
   }, {
-    id: 4,
     description:'App',
     amount: 200000, 
     date: '23/01/2021'
   }
 ]
 
-
 const Transaction = {
+  //novos lançamentos
+  all: transactions, 
+
+  add(transaction){
+    Transaction.all.push(transaction)
+
+    App.reload()
+  },
+  remove(index) {
+    Transaction.all.splice(index, 1)
+
+    App.reload()
+  },
   incomes(){
     //somar as entradas - pegar todas as transações. Para cada transaçao, se ela for maior que zero, somar a uma variável e retornar
     let income = 0;
-    transactions.forEach(transaction => {
+    Transaction.all.forEach(transaction => {
       if(transaction.amount > 0){
         income += transaction.amount;
       }
@@ -52,7 +61,7 @@ const Transaction = {
   expenses(){
     //somar as saídas - mesmo processo do incomes
     let expense = 0;
-    transactions.forEach(transaction => {
+    Transaction.all.forEach(transaction => {
       if(transaction.amount < 0){
         expense += transaction.amount;
       }
@@ -71,26 +80,27 @@ const DOM = {
   
   addTransaction(transaction, index) {
     const tr = document.createElement('tr')
-    tr.innerHTML = DOM.innerHTMLTransaction(transaction)
+    tr.innerHTML = DOM.innerHTMLTransaction(transaction, index)
+    tr.dataset.index = index
 
     DOM.transactionsContainer.appendChild(tr)
   },
-  innerHTMLTransaction(transaction){
+
+  innerHTMLTransaction(transaction, index){
     const CSSclass = transaction.amount > 0 ? "income" : "expense"
 
-    const amount = Utils.formatCurrency(transaction.amount)
+        const amount = Utils.formatCurrency(transaction.amount)
 
-    const html = ` 
-    <tr>
-      <td class="description">${transaction.description}</td>
-      <td class="${CSSclass}">${amount}</td>
-      <td class="date">${transaction.date}</td>
-      <td>
-        <img src="./assets/minus.svg " alt="Remover transação">
+        const html = `
+        <td class="description">${transaction.description}</td>
+        <td class="${CSSclass}">${amount}</td>
+        <td class="date">${transaction.date}</td>
+        <td>
+            <img onclick="Transaction.remove(${index})" src="./assets/minus.svg" alt="Remover transação">
         </td>
-    </tr>
-    `
-    return html
+        `
+
+        return html
   },
 
   updateBalance() {
@@ -103,6 +113,10 @@ const DOM = {
     document
       .getElementById('totalDisplay')
       .innerHTML = Utils.formatCurrency(Transaction.total())
+  },
+
+  clearTransactions() {
+    DOM.transactionsContainer.innerHTML = ""
   }
 }
 
@@ -120,8 +134,27 @@ const Utils = {
   }
 }
 
-transactions.forEach(function(transaction){
-  DOM.addTransaction(transaction)
-})
+const Form = {
+  submit(event){
+    event.preventDefault()
 
-DOM.updateBalance()
+  }
+}
+
+const App = {
+  init() {
+
+    Transaction.all.forEach transaction => {
+      DOM.addTransaction(transaction)
+    })
+
+    DOM.updateBalance()
+  },
+  reload() {
+    DOM.clearTransactions()
+    App.init()
+  },
+}
+
+App.init()
+
