@@ -97,7 +97,7 @@ const DOM = {
         <td class="${CSSclass}">${amount}</td>
         <td class="date">${transaction.date}</td>
         <td>
-          <img src="./assets/minus.svg " alt="Remover transação">
+          <img onclick="Transaction.remove(${index})" src="./assets/minus.svg " alt="Remover transação">
           </td>
       </tr>
     `
@@ -122,6 +122,18 @@ const DOM = {
 }
 
 const Utils = {
+  formatAmount(value){
+    value = Number(value.replace(/\,\./g, "")) * 100
+        
+    return value
+  },
+
+  formatDate(date){
+    const splittedDate = date.split("-")
+    
+    return `${splittedDate[2]}/${splittedDate[1]}/${splittedDate[0]}`
+  },
+
   formatCurrency(value){
     const signal = Number(value) < 0 ? "-" : ""
     value = String(value).replace(/\D/g, "")
@@ -147,6 +159,7 @@ const Form = {
       date: Form.date.value
     }
   },
+
   validateFields() {
     const { description, amount, date } = Form.getValues()
     
@@ -156,6 +169,31 @@ const Form = {
         throw new Error("Por favor, preencha todos os campos")
     }
   },
+
+  formatValues (){
+    let { description, amount, date } = Form.getValues()
+
+    amount = Utils.formatAmount(amount)
+
+    date = Utils.formatDate(date)
+    
+    return {
+      description,
+      amount,
+      date
+    }
+  },
+
+  saveTransaction(transaction){
+    Transaction.add(transaction)
+  },
+
+  clearFields() {
+    Form.description.value = ""
+    Form.amount.value = ""
+    Form.date.value = ""
+  },
+
   submit(event){
     event.preventDefault()
 
@@ -163,23 +201,26 @@ const Form = {
       //verificação se todas as infos foram preenchidas
       Form.validateFields()
       //formatar os dados para salvar
-      //Form.formatData()
+      const transaction = Form.formatValues()
       //salvar
+      Form.saveTransaction(transaction)
       //apagar os dados do formulário
+      Form.clearFields()
       //modal feche
-      //atualizar a aplicação
+      Modal.close()
+
     }catch (error){
       alert(error.message)
     }
     
-
   }
 }
 
 const App = {
   init() {
-
+    
     Transaction.all.forEach(DOM.addTransaction)
+
     DOM.updateBalance()
     
   },
