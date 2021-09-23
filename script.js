@@ -14,29 +14,19 @@ const Modal = {
   }
 }
 
-const transactions = [
-  {
-    description:'Luz',
-    amount: -50000, //valor será formatado posteriormente
-    date: '23/01/2021'
-  }, {
-    description:'Website',
-    amount: 500000, 
-    date: '23/01/2021'
-  }, {
-    description:'Internet',
-    amount: -20000, 
-    date: '23/01/2021'
-  }, {
-    description:'App',
-    amount: 200000, 
-    date: '23/01/2021'
+const Storage = {
+  get () {
+    return JSON.parse(localStorage.getItem('dev.finances:transactions')) || []
+  },
+
+  set(transactions){
+    localStorage.setItem("dev.finances:transactions", JSON.stringify(transactions))
   }
-]
+}
 
 const Transaction = {
   //novos lançamentos
-  all: transactions, 
+  all: Storage.get(),
 
   add(transaction){
     Transaction.all.push(transaction)
@@ -136,8 +126,11 @@ const Utils = {
 
   formatCurrency(value){
     const signal = Number(value) < 0 ? "-" : ""
+
     value = String(value).replace(/\D/g, "")
-    value = Number(value)/100
+
+    value = Number(value) / 100
+
     value = value.toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL"
@@ -164,8 +157,8 @@ const Form = {
     const { description, amount, date } = Form.getValues()
     
     if( description.trim() === "" || 
-      amount.trim() === "" ||
-      date.trim() === "") {
+        amount.trim() === "" ||
+        date.trim() === "") {
         throw new Error("Por favor, preencha todos os campos")
     }
   },
@@ -218,10 +211,11 @@ const Form = {
 
 const App = {
   init() {
-    
     Transaction.all.forEach(DOM.addTransaction)
-
+        
     DOM.updateBalance()
+
+    Storage.set(Transaction.all)
     
   },
   reload() {
